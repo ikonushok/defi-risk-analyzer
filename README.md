@@ -253,3 +253,5 @@ This project is for educational, analytical, and risk-research purposes only.
 It does not provide investment advice, financial recommendations, trading signals, or guarantees of safety or profitability.
 
 Always perform independent due diligence before interacting with any DeFi asset, pool, protocol, or smart contract.
+
+[RUS](README_rus_.md)
