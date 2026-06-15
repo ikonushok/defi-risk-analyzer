@@ -1,12 +1,12 @@
 # DeFi Risk Lens — Development Roadmap
 
-> Repository: `defi-risk-analyzer`  
-> Project: **DeFi Risk Lens**  
-> Document type: working product + engineering roadmap  
-> Status: target roadmap from empty repository to commercial MVP  
-> Audience: project owner / developer  
+> Repository: `defi-risk-analyzer`
+> Project: **DeFi Risk Lens**
+> Document type: working product + engineering roadmap
+> Status: target roadmap from empty repository to commercial MVP
+> Audience: project owner / developer
 >
-> This roadmap is based on `README_implementation_blueprint.md` and earlier roadmap drafts.  
+> This roadmap is based on `README_implementation_blueprint.md` and earlier roadmap drafts.
 > It is not a claim that all listed components are already implemented.
 
 ---
@@ -52,45 +52,45 @@ The project must not become:
 
 Correct output style:
 
-> Available data indicates elevated risk.  
-> Confidence is limited because holder data is missing.  
+> Available data indicates elevated risk.
+> Confidence is limited because holder data is missing.
 > Manual review is required before making any decision.
 
 Avoid output style:
 
-> This token is safe.  
-> This pool is guaranteed.  
+> This token is safe.
+> This pool is guaranteed.
 > This is definitely a scam.
 
 ---
 
 ## 3. Development principles
 
-1. **Contracts before integrations**  
+1. **Contracts before integrations**
    Implement schemas, validation, and deterministic demo fixtures before live APIs.
 
-2. **Demo data before live data**  
+2. **Demo data before live data**
    The first end-to-end flow must work without API keys, rate limits, or RPC dependencies.
 
-3. **Data provenance before scoring**  
+3. **Data provenance before scoring**
    Every metric must preserve source, timestamp, `chain_id`, and block/time range where applicable.
 
-4. **Normalization before features**  
+4. **Normalization before features**
    Chain, address, decimals, timestamps, units, and source status must be normalized before downstream feature calculation.
 
-5. **Explainability before automation**  
+5. **Explainability before automation**
    A useful report with visible factors, confidence, and missing data is more important than an opaque automated score.
 
-6. **Missing data is not low risk**  
+6. **Missing data is not low risk**
    Missing, stale, partial, or failed data must reduce confidence or produce `Insufficient data`.
 
-7. **Reports before SaaS**  
+7. **Reports before SaaS**
    Manual/demo reports should validate value before dashboard, monitoring, billing, or hosted API.
 
-8. **Monitoring after repeatable checks**  
+8. **Monitoring after repeatable checks**
    Alerts should only be implemented after token/pool analysis is stable, reproducible, and evidence-based.
 
-9. **Narrow MVP first**  
+9. **Narrow MVP first**
    Start with one or two chains, token/pool checks, demo fixtures, scoring v0, Markdown reports, and a simple local API.
 
 ---
@@ -1024,39 +1024,55 @@ Stop implementation and return to design review if:
 
 ---
 
-## 27. Recommended first 30 days
+## 27. Recommended 12-week development plan
 
-### Week 1 — Foundation
+This section turns the roadmap into a practical week-by-week development plan. It does not replace the roadmap phases. It maps them to calendar weeks: from an empty repository to a reproducible technical MVP and the first public demo assets.
 
-- Finalize README files.
-- Add package skeleton.
-- Add `.gitignore` and `.env.example`.
-- Add `configs/chains.yaml`.
-- Add initial test setup.
+Main principle: first build a reproducible local demo analysis without external APIs, then Markdown reports and API response shape, and only after that move to public demos, commercial validation, and live data adapters.
 
-### Week 2 — Contracts and demo fixtures
+| Week | Focus | Main tasks | Weekly result | Readiness check |
+|---:|---|---|---|---|
+| 1 | Repository foundation | Finalize README files; review project positioning; add Apache-2.0 license; add .gitignore and .env.example; clearly separate risk analysis from trading, price prediction, and wallet transaction signing. | The repository looks like a professional DeFi/on-chain risk analysis project. | Documentation contains no profit guarantees, trading signals, safety guarantees, or unsupported scam claims; .env and secrets are not committed. |
+| 2 | Package skeleton and configs | Create src/defi_risk_analyzer/; add __init__.py; add pyproject.toml or minimal project config; create configs/, data/demo/, reports/demo/, tests/; add configs/chains.yaml. | The project has an importable Python package structure. | defi_risk_analyzer can be imported; the test command runs; the package name is used consistently. |
+| 3 | Core data schemas | Implement AnalysisRequest, ObjectIdentity, SourceMetadata, TokenMetadata, PoolMetadata, RiskFactor, RiskResult, MissingDataItem. | Core data contracts are fixed before features, scoring, reports, and API. | Schemas serialize to JSON; invalid or incomplete required fields fail predictably. |
+| 4 | Validation layer | Implement validation for chain_id, address format, known chains, token decimals, source metadata, and source status. | Unsafe or ambiguous inputs cannot be silently accepted. | Missing chain_id is rejected; invalid address is rejected; missing source timestamp does not become low risk; missing decimals blocks analysis or lowers confidence according to the contract. |
+| 5 | Demo fixtures | Add demo token fixture, demo pool fixture, holder snapshot, liquidity snapshot, contract metadata, and expected output snapshot. | The first reproducible data layer exists without network calls or API keys. | Fixtures load locally; every fixture contains chain_id and source metadata; fixture loading failure returns an explicit error, not low risk. |
+| 6 | Data normalization | Implement address normalization, chain isolation, decimals/unit handling, timestamp normalization, source status propagation, and native token vs ERC-20/BEP-20-style token distinction. | Downstream modules receive normalized data. | The same address on different chains remains distinct; decimals are not silently assumed; partial/failed source status remains visible downstream. |
+| 7 | Token risk features v0 | Implement token metadata features, source verification flag, proxy/admin indicators, mint/burn permissions, blacklist/freeze/pause/transfer restriction flags, top-10/top-20 holder concentration, and liquidity evidence status. | Demo token produces a structured list of risk factors. | Every factor has category, value, evidence, source, risk level, and limitations; missing holder/contract data lowers confidence. |
+| 8 | Liquidity pool features v0 | Implement pool identity, DEX/pool address, token pair metadata, TVL/liquidity depth, liquidity dynamics, LP ownership concentration, volume/liquidity ratio, APR/APY realism, and withdrawal/liquidity shock risk. | Demo pool produces structured liquidity, APR, and withdrawal risk factors. | Low TVL raises liquidity risk; high APR with weak evidence raises sustainability risk; missing LP/APR data remains visible. |
+| 9 | Explainable scoring v0 | Implement risk-level mapping, category weights, factor contributions, confidence calculation, missing-data behavior, and the Insufficient data result. | Token and pool results receive an explainable risk score and a separate confidence score. | Score-only output is impossible; missing critical data lowers confidence; a known demo fixture returns a stable expected result. |
+| 10 | Markdown report generator | Create Markdown report template, report writer, raw metrics appendix; generate demo token report and demo pool report. | The first human-readable risk reports exist. | Reports include object identity, sources, timestamps, final risk level, score, confidence, factors, missing data, limitations, and recommended next checks. |
+| 11 | Local run and API shape | Add a simple script/CLI for demo analysis; prepare deterministic output path; add example API response shape; start FastAPI skeleton with /health, /v1/analyze/token, /v1/analyze/pool. | Demo analysis can be run end to end locally; the API contract is clear. | One local demo run passes without network access; the API response shape includes factors, confidence, sources, missing data, and limitations. |
+| 12 | Public demo assets | Prepare 3-5 demo reports, example API responses, case-study style README section, clear disclaimer, and a What this project demonstrates section. | The repository is ready as a proof asset for public review and early outreach. | Demo reports contain no client data or secrets; wording does not promise safety or profit; reports demonstrate liquidity, holders, contract, scoring, confidence, and missing-data logic. |
 
-- Implement core schemas.
-- Implement chain/address validation.
-- Add demo token fixture.
-- Add demo pool fixture.
-- Add fixture loading tests.
+### Development priorities by week group
 
-### Week 3 — Features and scoring
+| Period | Main goal | What not to do during this period |
+|---|---|---|
+| Weeks 1-4 | Repository foundation, package skeleton, schemas, and validation. | Do not start live APIs, dashboard, monitoring, SaaS, or broad multi-chain support. |
+| Weeks 5-8 | Demo fixtures, normalization, token features, and pool features. | Do not calibrate scoring on live assets before contracts and fixtures are stable. |
+| Weeks 9-10 | Explainable scoring and Markdown reports. | Do not show a score without factors, confidence, missing data, and limitations. |
+| Weeks 11-12 | Local run, API response shape, and public demo assets. | Do not move to hosted API/SaaS before commercial validation and repeated demand. |
 
-- Implement token feature extraction v0.
-- Implement liquidity feature extraction v0.
-- Implement scoring v0.
-- Implement confidence v0.
-- Add snapshot tests.
+### Readiness target after 12 weeks
 
-### Week 4 — Reports and first public demos
+By the end of week 12, the project should have a reproducible demo flow:
 
-- Implement Markdown report generator.
-- Generate token demo report.
-- Generate pool demo report.
-- Add example API response shape.
-- Prepare first case-study style README section.
+demo input -> normalized data -> risk factors -> score/confidence -> Markdown report -> example API response
+
+Minimum successful output:
+
+- object identity with chain_id and address;
+- source metadata with timestamp and status;
+- evidence for each risk factor;
+- final risk level;
+- risk score, if enough data is available;
+- confidence;
+- missing data;
+- limitations;
+- recommended next checks.
+
+If this flow does not work end to end, external data adapters, dashboard, monitoring, and hosted SaaS remain DEFERRED.
 
 ---
 

@@ -1,12 +1,12 @@
 # DeFi Risk Lens — Roadmap разработки
 
-> Репозиторий: `defi-risk-analyzer`  
-> Проект: **DeFi Risk Lens**  
-> Тип документа: рабочий product + engineering roadmap  
-> Статус: целевой roadmap от пустого репозитория до commercial MVP  
-> Аудитория: владелец проекта / разработчик  
+> Репозиторий: `defi-risk-analyzer`
+> Проект: **DeFi Risk Lens**
+> Тип документа: рабочий product + engineering roadmap
+> Статус: целевой roadmap от пустого репозитория до commercial MVP
+> Аудитория: владелец проекта / разработчик
 >
-> Этот roadmap основан на `README_implementation_blueprint.md` и более ранних roadmap drafts.  
+> Этот roadmap основан на `README_implementation_blueprint.md` и более ранних roadmap drafts.
 > Он не является утверждением, что все перечисленные компоненты уже реализованы.
 
 ---
@@ -52,45 +52,45 @@ Core positioning:
 
 Корректный стиль вывода:
 
-> Доступные данные указывают на повышенный риск.  
-> Confidence ограничена, потому что отсутствуют данные по holders.  
+> Доступные данные указывают на повышенный риск.
+> Confidence ограничена, потому что отсутствуют данные по holders.
 > Перед принятием любого решения требуется ручная проверка.
 
 Избегать такого стиля вывода:
 
-> Этот токен безопасен.  
-> Этот пул гарантирован.  
+> Этот токен безопасен.
+> Этот пул гарантирован.
 > Это точно scam.
 
 ---
 
 ## 3. Принципы разработки
 
-1. **Contracts before integrations**  
+1. **Contracts before integrations**
    Реализовать schemas, validation и deterministic demo fixtures до live APIs.
 
-2. **Demo data before live data**  
+2. **Demo data before live data**
    Первый end-to-end flow должен работать без API keys, rate limits или RPC dependencies.
 
-3. **Data provenance before scoring**  
+3. **Data provenance before scoring**
    Каждая metric должна сохранять source, timestamp, `chain_id` и block/time range, где применимо.
 
-4. **Normalization before features**  
+4. **Normalization before features**
    Chain, address, decimals, timestamps, units и source status должны быть normalized до downstream feature calculation.
 
-5. **Explainability before automation**  
+5. **Explainability before automation**
    Полезный report с visible factors, confidence и missing data важнее, чем opaque automated score.
 
-6. **Missing data is not low risk**  
+6. **Missing data is not low risk**
    Missing, stale, partial или failed data должны снижать confidence или давать `Insufficient data`.
 
-7. **Reports before SaaS**  
+7. **Reports before SaaS**
    Manual/demo reports должны validated value до dashboard, monitoring, billing или hosted API.
 
-8. **Monitoring after repeatable checks**  
+8. **Monitoring after repeatable checks**
    Alerts следует реализовывать только после того, как token/pool analysis stable, reproducible и evidence-based.
 
-9. **Narrow MVP first**  
+9. **Narrow MVP first**
    Начать с одной или двух chains, token/pool checks, demo fixtures, scoring v0, Markdown reports и простого local API.
 
 ---
@@ -1024,39 +1024,55 @@ Detect risk deterioration over time for selected tokens, pools, protocols, or po
 
 ---
 
-## 27. Recommended first 30 days
+## 27. Рекомендуемый 12-недельный план разработки
 
-### Week 1 — Foundation
+Этот раздел превращает roadmap в практический понедельный план разработки. Он не заменяет фазы roadmap, а раскладывает их по календарным неделям: от пустого репозитория до воспроизводимого технического MVP и первых публичных demo-материалов.
 
-- Finalize README files.
-- Add package skeleton.
-- Add `.gitignore` and `.env.example`.
-- Add `configs/chains.yaml`.
-- Add initial test setup.
+Главный принцип: сначала сделать воспроизводимый локальный demo-анализ без внешних API, затем Markdown-отчёты и форму API-ответа, и только после этого переходить к публичным demo, коммерческой проверке и live data adapters.
 
-### Week 2 — Contracts and demo fixtures
+| Неделя | Фокус | Основные задачи | Результат недели | Проверка готовности |
+|---:|---|---|---|---|
+| 1 | Основа репозитория | Финализировать README-файлы; проверить позиционирование проекта; добавить лицензию Apache-2.0; добавить .gitignore и .env.example; явно отделить анализ рисков от торговли, прогнозирования цены и подписания транзакций кошелька. | Репозиторий выглядит как профессиональный проект по анализу DeFi/on-chain рисков. | В документации нет обещаний прибыли, торговых сигналов, гарантий безопасности или неподтверждённых выводов о scam; .env и секреты не попадают в git. |
+| 2 | Скелет пакета и конфиги | Создать src/defi_risk_analyzer/; добавить __init__.py; добавить pyproject.toml или минимальный конфиг проекта; создать configs/, data/demo/, reports/demo/, tests/; добавить configs/chains.yaml. | У проекта есть импортируемая структура Python-пакета. | Импорт defi_risk_analyzer работает; тестовая команда запускается; имя пакета используется последовательно. |
+| 3 | Базовые схемы данных | Реализовать AnalysisRequest, ObjectIdentity, SourceMetadata, TokenMetadata, PoolMetadata, RiskFactor, RiskResult, MissingDataItem. | Зафиксированы базовые контракты данных до реализации признаков, scoring, отчётов и API. | Схемы сериализуются в JSON; невалидные или неполные обязательные поля отклоняются предсказуемо. |
+| 4 | Слой валидации | Реализовать валидацию chain_id, формата address, известных сетей, token decimals, source metadata и source status. | Входные данные нельзя молча принять в опасном или неоднозначном виде. | Отсутствующий chain_id отклоняется; invalid address отклоняется; отсутствие timestamp у источника не превращается в low risk; отсутствие decimals блокирует анализ или снижает confidence согласно контракту. |
+| 5 | Demo fixtures | Добавить demo token fixture, demo pool fixture, holder snapshot, liquidity snapshot, contract metadata и expected output snapshot. | Появился первый воспроизводимый слой данных без сетевых запросов и API keys. | Fixtures загружаются локально; каждый fixture содержит chain_id и source metadata; ошибка загрузки fixture возвращает явную ошибку, а не low risk. |
+| 6 | Нормализация данных | Реализовать нормализацию address, изоляцию по chain, обработку decimals/units, нормализацию timestamps, передачу source status, различение native token и ERC-20/BEP-20-style token. | Модули ниже по pipeline получают нормализованные данные. | Один и тот же address в разных chains остаётся разными объектами; decimals не предполагаются молча; partial/failed source status виден ниже по pipeline. |
+| 7 | Token risk features v0 | Реализовать признаки: token metadata, флаг верификации source, proxy/admin indicators, mint/burn permissions, blacklist/freeze/pause/transfer restriction flags, top-10/top-20 holder concentration, liquidity evidence status. | Demo token формирует структурированный список факторов риска. | Каждый factor имеет category, value, evidence, source, risk level и limitations; отсутствие holder/contract data снижает confidence. |
+| 8 | Liquidity pool features v0 | Реализовать признаки: pool identity, DEX/pool address, token pair metadata, TVL/liquidity depth, liquidity dynamics, LP ownership concentration, volume/liquidity ratio, APR/APY realism, withdrawal/liquidity shock risk. | Demo pool формирует структурированные факторы риска по ликвидности, APR и withdrawal risk. | Low TVL повышает liquidity risk; высокий APR при слабом evidence повышает sustainability risk; missing LP/APR data остаётся видимым. |
+| 9 | Объяснимый scoring v0 | Реализовать risk-level mapping, category weights, factor contributions, confidence calculation, missing-data behavior и результат Insufficient data. | Token и pool results получают объяснимый risk score и отдельный confidence score. | Невозможно вернуть только score без факторов; отсутствие критических данных снижает confidence; known demo fixture возвращает стабильный expected result. |
+| 10 | Генератор Markdown-отчётов | Создать Markdown report template, report writer, raw metrics appendix; сгенерировать demo token report и demo pool report. | Появились первые человекочитаемые risk reports. | Отчёты содержат object identity, sources, timestamps, final risk level, score, confidence, factors, missing data, limitations и recommended next checks. |
+| 11 | Локальный запуск и форма API | Добавить простой script/CLI для demo analysis; подготовить deterministic output path; добавить example API response shape; начать FastAPI skeleton с /health, /v1/analyze/token, /v1/analyze/pool. | Demo analysis можно запустить end to end локально; API contract понятен. | Один local demo run проходит без network; форма API-ответа содержит factors, confidence, sources, missing data и limitations. |
+| 12 | Публичные demo-материалы | Подготовить 3-5 demo reports, example API responses, case-study style README section, clear disclaimer, блок What this project demonstrates. | Репозиторий готов как proof asset для публичного просмотра и первых outbound-диалогов. | Demo reports не содержат client data or secrets; wording не обещает safety/profit; reports показывают liquidity, holders, contract, scoring, confidence и missing-data logic. |
 
-- Implement core schemas.
-- Implement chain/address validation.
-- Add demo token fixture.
-- Add demo pool fixture.
-- Add fixture loading tests.
+### Приоритеты разработки по группам недель
 
-### Week 3 — Features and scoring
+| Период | Главная цель | Что не делать в этот период |
+|---|---|---|
+| Недели 1-4 | Основа репозитория, скелет пакета, схемы и валидация. | Не начинать live APIs, dashboard, monitoring, SaaS или широкую multi-chain поддержку. |
+| Недели 5-8 | Demo fixtures, нормализация, token features и pool features. | Не калибровать scoring на live assets без стабильных contracts и fixtures. |
+| Недели 9-10 | Объяснимый scoring и Markdown reports. | Не показывать score без factors, confidence, missing data и limitations. |
+| Недели 11-12 | Локальный запуск, форма API-ответа и публичные demo-материалы. | Не переходить к hosted API/SaaS до commercial validation и повторяющегося спроса. |
 
-- Implement token feature extraction v0.
-- Implement liquidity feature extraction v0.
-- Implement scoring v0.
-- Implement confidence v0.
-- Add snapshot tests.
+### Цель готовности после 12 недель
 
-### Week 4 — Reports and first public demos
+К концу 12-й недели проект должен иметь воспроизводимый demo flow:
 
-- Implement Markdown report generator.
-- Generate token demo report.
-- Generate pool demo report.
-- Add example API response shape.
-- Prepare first case-study style README section.
+demo input -> normalized data -> risk factors -> score/confidence -> Markdown report -> example API response
+
+Минимальный успешный результат:
+
+- идентификация объекта с chain_id и address;
+- metadata источника с timestamp и status;
+- evidence по каждому фактору риска;
+- итоговый risk level;
+- risk score, если данных достаточно;
+- confidence;
+- missing data;
+- limitations;
+- recommended next checks.
+
+Если этот flow не работает end to end, external data adapters, dashboard, monitoring и hosted SaaS остаются в статусе DEFERRED.
 
 ---
 
